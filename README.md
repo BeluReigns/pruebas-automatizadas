@@ -115,3 +115,39 @@ las ramas y commits de Git y la ejecución exitosa de las pruebas.
 
 Material de estudio ME_1 de la Unidad I de Automatización de Pruebas,
 IPLACEX.
+
+## Ejecución con Docker
+
+Se necesita Docker Desktop instalado y en funcionamiento.
+Java y Maven vienen incluidos en la imagen del contenedor.
+
+Desde la raíz del proyecto, construir la imagen:
+
+```bash
+docker build -t pruebas-auto:java17 .
+```
+
+Ejecutar las pruebas:
+
+```bash
+docker run --rm pruebas-auto:java17
+```
+
+El contenedor ejecuta las pruebas y se detiene al terminar.
+El resultado comprobado fue de dos pruebas exitosas, sin fallos ni errores.
+
+Para trabajar con los archivos del proyecto montados desde el computador:
+
+```bash
+docker run --rm \
+  --mount type=bind,source="$(pwd)",target=/app \
+  pruebas-auto:java17 mvn -B test
+```
+
+El montaje permite que el contenedor utilice los archivos actuales del
+proyecto. Los reportes quedan disponibles en target/surefire-reports
+dentro de la carpeta del computador.
+
+El Dockerfile define Java 17 y Maven 3.9.11. Esto reduce las diferencias
+entre instalaciones manuales. Git permite identificar los cambios del
+entorno y pom.xml mantiene la configuración de las dependencias.
