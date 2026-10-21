@@ -27,14 +27,15 @@ jobs:
       - name: Generar reporte HTML
         if: success()
         run: mvn --batch-mode surefire-report:report-only
-
-      - name: Publicar reportes JUnit
+        
+      - name: Publicar reportes de pruebas
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: reportes-junit
+          name: reportes-pruebas
           path: |
             target/surefire-reports/
             target/site/
+            target/cucumber-report.html
           if-no-files-found: warn
           retention-days: 14
