@@ -1,0 +1,40 @@
+
+name: Pruebas automatizadas - CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pruebas-unitarias:
+    name: Compilar y ejecutar JUnit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Compilar y ejecutar pruebas
+        run: mvn --batch-mode clean verify
+
+      - name: Generar reporte HTML
+        if: success()
+        run: mvn --batch-mode surefire-report:report-only
+
+      - name: Publicar reportes JUnit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reportes-junit
+          path: |
+            target/surefire-reports/
+            target/site/
+          if-no-files-found: warn
+          retention-days: 14
