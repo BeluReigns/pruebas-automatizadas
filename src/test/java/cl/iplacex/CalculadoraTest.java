@@ -14,4 +14,13 @@ class CalculadoraTest {
 
         assertEquals(5, resultado);
     }
+
+    @Test
+    void restaDosNumerosPositivos() {
+        Calculadora calculadora = new Calculadora();
+
+        int resultado = calculadora.restar(5, 2);
+
+        assertEquals(3, resultado);
+    }
 }
