@@ -1,5 +1,4 @@
 
-
 name: Pruebas automatizadas - CI
 
 on:
@@ -25,11 +24,17 @@ jobs:
       - name: Compilar y ejecutar pruebas
         run: mvn --batch-mode clean verify
 
+      - name: Generar reporte HTML
+        if: success()
+        run: mvn --batch-mode surefire-report:report-only
+
       - name: Publicar reportes JUnit
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: reportes-junit
-          path: target/surefire-reports/
+          path: |
+            target/surefire-reports/
+            target/site/
           if-no-files-found: warn
           retention-days: 14
