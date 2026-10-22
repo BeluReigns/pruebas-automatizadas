@@ -166,6 +166,77 @@ Estos resultados corresponden a las pruebas que implementé para la calculadora.
 Después de agregar el escenario parametrizado, comprobé localmente siete pruebas aprobadas. La ejecución #12 de GitHub Actions, correspondiente al commit `486a7a1`, terminó correctamente y publicó
 el artefacto `reportes-pruebas`.
 
+## Prueba de rendimiento con JMeter
+
+Utilicé Apache JMeter 5.6.3 con Java 17.0.15 en macOS.
+El plan está guardado en `performance/calculadora.jmx`.
+
+La prueba ejecuta el método `sumar(2, 3)` de la clase Calculadora
+y comprueba que devuelva 5. No utiliza una API ni realiza solicitudes HTTP.
+
+### Configuración
+
+- Cinco usuarios simulados.
+- Inicio gradual de los usuarios durante cinco segundos.
+- Cien repeticiones por usuario: 500 muestras en total.
+- Pausa de 100 ms antes de cada muestra.
+- Sampler JSR223 con Groovy y caché de compilación activada.
+
+### Ejecución
+
+Primero se debe compilar el proyecto para disponer de
+`target/classes/cl/iplacex/Calculadora.class`.
+
+Con JMeter descomprimido en Descargas, ejecutar desde la raíz del proyecto:
+
+```bash
+mkdir -p target
+resultado_dir=$(mktemp -d "$(pwd)/target/jmeter-XXXXXX")
+
+bash "$HOME/Downloads/apache-jmeter-5.6.3/bin/jmeter" \
+  -n \
+  -t performance/calculadora.jmx \
+  -Juser.classpath="$(pwd)/target/classes" \
+  -l "$resultado_dir/resultados.jtl" \
+  -j "$resultado_dir/jmeter.log" \
+  -e \
+  -o "$resultado_dir/reporte"
+```
+
+Si la ejecución y la generación del reporte terminan correctamente,
+abrirlo en la misma terminal:
+
+```bash
+open "$resultado_dir/reporte/index.html"
+```
+
+### Resultados de la ejecución local
+
+| Indicador | Resultado |
+| --- | --- |
+| Muestras | 500 |
+| Fallidas | 0 |
+| Porcentaje de errores | 0 % |
+| Transacciones por segundo | 34,91 |
+| Tiempo de respuesta medio | 1,77 ms |
+| Tiempo de respuesta p95 | 1 ms |
+| Tiempo de respuesta máximo | 551 ms |
+
+Los TPS indican las muestras procesadas por segundo; en esta ejecución
+todas fueron exitosas. El p95 describe el percentil 95 de los tiempos
+registrados. El porcentaje de errores indica la proporción de muestras
+fallidas respecto del total.
+
+Estos resultados corresponden a una ejecución local, no a una simulación.
+Los tiempos incluyen el trabajo del sampler y no miden latencia de red.
+La pausa limita la carga, por lo que los TPS no representan la capacidad
+máxima de la calculadora. Un tiempo registrado de 0 ms no implica que
+la operación sea instantánea.
+
+El máximo observado fue de 551 ms. No se investigó su causa.
+Los umbrales APDEX mostrados por JMeter son los predeterminados del
+reporte y no constituyen alertas configuradas.
+
 ## Control de versiones
 
 En la Unidad I trabajé con distintas ramas para organizar las pruebas y los cambios de Docker, incluyendo el paso de Java 17 a Java 21.
