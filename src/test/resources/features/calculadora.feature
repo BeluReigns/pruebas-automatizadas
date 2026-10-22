@@ -15,3 +15,14 @@ Característica: Operaciones de la calculadora
     Dado que tengo una calculadora
     Cuando resto 5 y 2
     Entonces el resultado debe ser 3
+ 
+  Esquema del escenario: Sumar números con distintas combinaciones
+    Dado que tengo una calculadora
+    Cuando sumo <numeroUno> y <numeroDos>
+    Entonces el resultado debe ser <resultadoEsperado>
+
+    Ejemplos:
+      | numeroUno | numeroDos | resultadoEsperado |
+      | 0         | 5         | 5                 |
+      | -2        | -3        | -5                |
+      | -2        | 3         | 1                 |
