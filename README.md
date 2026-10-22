@@ -237,6 +237,109 @@ El máximo observado fue de 551 ms. No se investigó su causa.
 Los umbrales APDEX mostrados por JMeter son los predeterminados del
 reporte y no constituyen alertas configuradas.
 
+## Dashboard del pipeline — simulación
+
+Esta tabla simula una vista conjunta de pruebas funcionales y rendimiento.
+Los valores proceden de ejecuciones locales reales ya revisadas, pero
+su recopilación en esta vista es manual. No representa un dashboard
+actualizado automáticamente ni una única ejecución de CI.
+
+| Indicador | Resultado observado | Fuente |
+| --- | --- | --- |
+| Pruebas unitarias aprobadas | 2 de 2 | Surefire |
+| Casos BDD aprobados | 5 de 5 | Cucumber |
+| Total de pruebas funcionales fallidas | 0 | Surefire |
+| Pruebas omitidas | 0 | Surefire |
+| Muestras de rendimiento | 500 | JMeter |
+| Transacciones por segundo | 34,91 | JMeter |
+| Tiempo de respuesta medio | 1,77 ms | JMeter |
+| Tiempo de respuesta p95 | 1 ms | JMeter |
+| Tiempo de respuesta máximo | 551 ms | JMeter |
+| Errores de rendimiento | 0 % | JMeter |
+
+Los reportes funcionales están disponibles en
+`target/site/surefire-report.html` y `target/cucumber-report.html`.
+El reporte de rendimiento está dentro de la carpeta
+`target/jmeter-.../reporte/` creada para esa ejecución.
+
+### Propuesta de integración en CI
+
+Actualmente GitHub Actions ejecuta JUnit y Cucumber y publica sus reportes.
+La prueba JMeter se ejecutó localmente; todavía no forma parte del workflow.
+
+Para integrar esta vista, agregaría una etapa posterior a las pruebas
+funcionales que prepare JMeter, ejecute `performance/calculadora.jmx`
+con acceso a las clases compiladas y publique el archivo JTL y su
+reporte HTML como artefactos.
+
+Después, un paso de resumen recogería los resultados de Surefire y JMeter
+para mostrar esta tabla en el resumen de la ejecución. Cada resultado
+se identificaría con su commit y ejecución para evitar mezclar mediciones
+de versiones diferentes.
+
+Esta integración es una propuesta. No se ha implementado la recopilación
+automática ni un historial de métricas de rendimiento.
+
+## Alertas automáticas — propuesta y simulación
+
+Actualmente el workflow muestra el estado de la compilación y las pruebas.
+No he configurado envíos a Slack o correo ni evaluación automática de
+umbrales de rendimiento.
+
+### Reglas propuestas
+
+| Situación | Condición propuesta | Acción |
+| --- | --- | --- |
+| Fallo funcional | Al menos una prueba JUnit o Cucumber falla | Marcar la ejecución como fallida y notificar. |
+| Error de rendimiento | Porcentaje de errores mayor que 0 % | Marcar la validación de rendimiento como fallida y notificar. |
+| Tiempo de respuesta elevado | p95 mayor que 100 ms | Notificar la superación del umbral. |
+| Ejecución incompleta | Cantidad de muestras distinta de 500 | Avisar que el resultado no corresponde al plan esperado. |
+
+Estos umbrales son una propuesta académica para futuras ejecuciones,
+no requisitos de negocio ni reglas ya implementadas. Deben revisarse
+con varias mediciones en condiciones comparables.
+
+Los TPS se mostrarían como indicador informativo. No establecería todavía
+un mínimo porque la pausa del plan limita la carga y solo contamos con
+una ejecución de referencia.
+
+### Cómo se configurarían
+
+Para los fallos funcionales, utilizaría el estado del job de GitHub Actions
+y habilitaría las notificaciones de ejecuciones fallidas en la cuenta.
+La recepción de esas notificaciones no se ha comprobado en esta actividad.
+
+Para rendimiento, agregaría al workflow un paso que lea los resultados
+JTL, compruebe las reglas y termine con un código de salida distinto de
+cero si alguna se incumple. JMeter puede completar su ejecución aunque
+existan muestras fallidas: finalizar el comando no demuestra por sí solo
+que se cumplieron los criterios de calidad.
+
+Un paso posterior enviaría el aviso por correo o mediante un webhook
+de Slack, almacenando las credenciales en los secretos de GitHub.
+El mensaje incluiría la rama, el commit, la regla incumplida y el enlace
+a la ejecución y sus reportes.
+
+Esta evaluación puede realizarse dentro del pipeline sin instalar Grafana.
+Para alertas continuas fuera de las ejecuciones de pruebas, sería necesario
+un sistema adicional de monitoreo.
+
+### Ejemplo de alerta simulada
+
+Los siguientes datos son ficticios y solo ilustran el aviso:
+
+> SIMULACIÓN — Alerta de rendimiento
+>
+> Funcionalidad: suma de la calculadora.
+> Muestras: 500.
+> Errores: 2 %; condición permitida propuesta: 0 %.
+> Tiempo de respuesta p95: 150 ms; límite propuesto: 100 ms.
+> Acción: revisar las muestras fallidas y los tiempos del reporte.
+> El aviso real incluiría el commit y el enlace a la ejecución.
+
+Este mensaje no fue enviado. La ejecución real revisada tuvo
+0 % de errores y un p95 de 1 ms.
+
 ## Control de versiones
 
 En la Unidad I trabajé con distintas ramas para organizar las pruebas y los cambios de Docker, incluyendo el paso de Java 17 a Java 21.
