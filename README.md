@@ -56,9 +56,49 @@ mvn surefire-report:report-only
 
 Los resultados XML y TXT quedan en `target/surefire-reports/` y el reporte HTML de Surefire en `target/site/surefire-report.html`.
 
+## Simulación Three Amigos
+
+Esta minuta es una simulación académica entre los roles de negocio,
+desarrollo y QA. Documenta los acuerdos para los escenarios de la
+calculadora; no corresponde a una reunión real entre tres participantes.
+
+### Objetivo y alcance
+
+Comprobar que la calculadora sume y reste dos números enteros correctamente.
+Los ejemplos incluyen números positivos, cero y números negativos.
+En esta actividad no se abordan decimales ni desbordamiento de enteros.
+
+### Roles y acuerdos
+
+| Rol | Punto discutido | Acuerdo |
+| --- | --- | --- |
+| Negocio | ¿Qué necesita el usuario? | Obtener resultados correctos al sumar y restar. |
+| Desarrollo | ¿Cómo se realizarán las operaciones? | Reutilizar los métodos `sumar` y `restar` de `Calculadora`, manteniendo la lógica fuera de los steps. |
+| QA | ¿Cómo comprobaremos el comportamiento? | Comparar cada resultado con un valor esperado y usar un esquema del escenario para probar varias combinaciones. |
+
+### Criterios de aceptación y ejemplos
+
+| Criterio | Ejemplo | Resultado esperado |
+| --- | --- | --- |
+| Sumar dos enteros positivos | 2 + 3 | 5 |
+| Restar dos enteros positivos | 5 - 2 | 3 |
+| Sumar cero a un entero | 0 + 5 | 5 |
+| Sumar dos enteros negativos | -2 + (-3) | -5 |
+| Sumar enteros de signos distintos | -2 + 3 | 1 |
+
+Los dos primeros ejemplos se mantienen como escenarios individuales.
+Los otros tres se ejecutan mediante `Esquema del escenario` y `Ejemplos`,
+equivalentes a `Scenario Outline` y `Examples` en Gherkin.
+
+Cada caso debe ejecutarse de forma independiente y aprobar únicamente
+cuando el resultado obtenido coincida con el esperado.
+
 ## Pruebas BDD con Cucumber
 
-Para la segunda actividad de la Unidad II agregué dos escenarios en Gherkin: sumar 2 + 3 y restar 5 - 2.
+Para la segunda actividad de la Unidad II agregué dos escenarios
+individuales: sumar 2 + 3 y restar 5 - 2. Después incorporé un esquema
+del escenario con tres ejemplos de suma: cero, números negativos
+y números de signos distintos.
 
 - `calculadora.feature`: contiene los escenarios escritos en español, con `Dado`, `Cuando` y `Entonces`.
 - `CalculadoraSteps.java`: conecta esos pasos con los métodos Java y comprueba los resultados.
@@ -70,7 +110,11 @@ Para ejecutar las pruebas:
 mvn test
 ```
 
-En la ejecución local pasaron las cuatro pruebas: dos de JUnit y dos escenarios de Cucumber, sin errores ni fallos. El reporte de Cucumber queda en `target/cucumber-report.html`.
+La última ejecución local confirmó siete pruebas aprobadas: dos pruebas
+unitarias JUnit y cinco casos BDD de Cucumber, sin fallos, errores ni
+pruebas omitidas. Cada fila de Ejemplos se ejecuta como un caso BDD
+independiente. El reporte de Cucumber queda en
+`target/cucumber-report.html`.
 
 ## Ejecutar con Docker
 
@@ -119,14 +163,22 @@ Después incorporé Cucumber. La ejecución local mostró cuatro pruebas aprobad
 
 Estos resultados corresponden a las pruebas que implementé para la calculadora.
 
+Después de agregar el escenario parametrizado, comprobé localmente siete pruebas aprobadas. La ejecución #12 de GitHub Actions, correspondiente al commit `486a7a1`, terminó correctamente y publicó
+el artefacto `reportes-pruebas`.
+
 ## Control de versiones
 
 En la Unidad I trabajé con distintas ramas para organizar las pruebas y los cambios de Docker, incluyendo el paso de Java 17 a Java 21.
 
-En la Unidad II utilicé dos ramas:
+En la Unidad II utilicé las siguientes ramas:
 
-- `feature/unidad2-integracion-continua`: para las pruebas JUnit, GitHub Actions y los reportes. Ya se integró en `main` mediante el Pull Request #1.
-- `feature/unidad2-bdd-cucumber`: para agregar Cucumber, los escenarios Gherkin y sus reportes. Esta rama está pendiente de integrar en `main` mediante un segundo Pull Request.
+- `feature/unidad2-integracion-continua`: pruebas JUnit, GitHub Actions
+  y reportes. Integrada en `main` mediante el Pull Request #1.
+- `feature/unidad2-bdd-cucumber`: Cucumber, escenarios Gherkin y reportes.
+  Integrada en `main` mediante el Pull Request #2.
+- `feature/unidad2-reporte-calidad`: escenario parametrizado y trabajo
+  para completar rendimiento, métricas, alertas y documentación.
+  Esta rama continúa en desarrollo.
 
 Puedo revisar el historial con:
 
