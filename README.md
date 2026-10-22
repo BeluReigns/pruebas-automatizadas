@@ -26,6 +26,8 @@ cd pruebas-automatizadas
 ```text
 .github/workflows/ci.yml
 .mvn/
+performance/
+  calculadora.jmx
 src/main/java/cl/iplacex/
   App.java
   Calculadora.java
@@ -352,7 +354,7 @@ En la Unidad II utilicé las siguientes ramas:
   Integrada en `main` mediante el Pull Request #2.
 - `feature/unidad2-reporte-calidad`: escenario parametrizado y trabajo
   para completar rendimiento, métricas, alertas y documentación.
-  Esta rama continúa en desarrollo.
+  Integrada en `main` mediante el Pull Request #3.
 
 Puedo revisar el historial con:
 
